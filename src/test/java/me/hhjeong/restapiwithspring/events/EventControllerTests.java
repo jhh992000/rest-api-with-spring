@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DisplayName("이벤트 생성 통합 테스트")
 public class EventControllerTests {
 
 	@Autowired
@@ -124,12 +125,16 @@ public class EventControllerTests {
 
 
 		this.mockMvc.perform(
-				post("/api/events")
-						.contentType(MediaType.APPLICATION_JSON)
-						.accept(MediaTypes.HAL_JSON)
-						.content(objectMapper.writeValueAsString(eventDto))
-		)
+					post("/api/events")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaTypes.HAL_JSON)
+					.content(objectMapper.writeValueAsString(eventDto))
+				)
+				.andDo(print())
 				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$[0].objectName").exists())
+				.andExpect(jsonPath("$[0].defaultMessage").exists())
+				.andExpect(jsonPath("$[0].code").exists())
 		;
 
 	}
