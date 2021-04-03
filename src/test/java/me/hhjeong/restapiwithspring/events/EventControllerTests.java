@@ -60,7 +60,7 @@ public class EventControllerTests {
 	}
 
 	@Test
-	@DisplayName("이벤트 생성(입력값 이외에 에러 발생)")
+	@DisplayName("이벤트 생성 (알수없는 입력값이 존재할 경우 에러 발생)")
 	public void createEvent_BadRequest() throws Exception {
 		Event event = Event.builder()
 				.id(100)
@@ -86,6 +86,23 @@ public class EventControllerTests {
 				.andDo(print())
 				.andExpect(status().isBadRequest())
 		;
+	}
+
+	@Test
+	@DisplayName("이벤트 생성 (입력값이 비어있을 경우 예외 발생)")
+	public void createEvent_Bad_Request_Empty_Input() throws Exception {
+
+		EventDto eventDto = EventDto.builder().build();
+
+		this.mockMvc.perform(
+					post("/api/events")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaTypes.HAL_JSON)
+					.content(objectMapper.writeValueAsString(eventDto))
+				)
+				.andExpect(status().isBadRequest())
+		;
+
 	}
 
 }
