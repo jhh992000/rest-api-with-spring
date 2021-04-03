@@ -1,4 +1,5 @@
 package me.hhjeong.restapiwithspring.events;
 
-public class EventStatus {
+public enum EventStatus {
+	DRAFT, PUBLISHED, BEGAN_ENROLLMEND;
 }
