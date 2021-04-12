@@ -1,15 +1,20 @@
 package me.hhjeong.restapiwithspring.events;
 
+import me.hhjeong.restapiwithspring.test.QuickTag;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
+
 
 class EventTest {
 
@@ -19,11 +24,28 @@ class EventTest {
 				.name("인프런 Spring REST API")
 				.description("REST API development with Spring")
 				.build();
-		assertNotNull(event);
+
+		//assertj 코드
+		assertThat(event).isNotNull();
+
+		//junit 코드
+		//assertNotNull(event);
 	}
 
 	@Test
+	@DisplayName("이벤트 정보 비교 테스트")
+	@QuickTag
 	public void javaBean() {
+
+		//조건이 맞을때만 테스트 진행, false인 경우 테스트 중지
+		assumeTrue(true);
+
+		//조건이 맞을때 하위 메서드 실행
+		assumingThat(true, () -> {
+			assertThat("1").isEqualTo("2");
+		});
+
+
 		var name = "정훈희";
 		String description = "설명";
 
@@ -31,8 +53,9 @@ class EventTest {
 		event.setName("정훈희");
 		event.setDescription(description);
 
-		assertEquals(event.getName(), name);
-		assertEquals(event.getDescription(), description);
+		assertThat(event.getName()).as("이름이 다릅니다.").isEqualTo(name);
+		//assertEquals(event.getName(), name, "이름이 다릅니다.");
+		//assertEquals(event.getDescription(), description, "내용이 다릅니다.");
 	}
 
 
