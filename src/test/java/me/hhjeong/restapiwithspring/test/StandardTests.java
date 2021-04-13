@@ -23,6 +23,7 @@ class StandardTests {
 	}
 
 	@Test
+	@Disabled
 	void failingTest() {
 		System.out.println("[Test] failingTest.");
 		fail("a failing test");

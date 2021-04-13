@@ -14,17 +14,20 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs
 @Import({RestDocsConfiguration.class})
 @DisplayName("이벤트 생성 통합 테스트")
+@ActiveProfiles("test")
 public class EventControllerTests {
 
 	@Autowired
@@ -42,6 +46,9 @@ public class EventControllerTests {
 
 	@Autowired
 	ObjectMapper objectMapper;
+
+	@Autowired
+	EventRepository eventRepository;
 
 	@Test
 	@DisplayName("이벤트 생성")
@@ -78,11 +85,12 @@ public class EventControllerTests {
 				.andExpect(MockMvcResultMatchers.jsonPath("_links.self").exists())
 				.andExpect(MockMvcResultMatchers.jsonPath("_links.query-events").exists())
 				.andExpect(MockMvcResultMatchers.jsonPath("_links.update-events").exists())
-				.andDo(MockMvcRestDocumentation.document("createEvent",
+				.andDo(document("create-event",
 						HypermediaDocumentation.links(
 								linkWithRel("self").description("link to self"),
 								linkWithRel("query-events").description("link to query events"),
-								linkWithRel("update-events").description("link to update an existing")
+								linkWithRel("update-events").description("link to update an existing"),
+								linkWithRel("profile").description("link to profile an existing")
 						),
 						requestHeaders(
 								headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -122,7 +130,8 @@ public class EventControllerTests {
 								fieldWithPath("eventStatus").description("event status"),
 								fieldWithPath("_links.self.href").description("link to self"),
 								fieldWithPath("_links.query-events.href").description("link to query event"),
-								fieldWithPath("_links.update-events.href").description("link to update existing event")
+								fieldWithPath("_links.update-events.href").description("link to update existing event"),
+								fieldWithPath("_links.profile.href").description("link to profile")
 
 						)
 				))
@@ -201,11 +210,43 @@ public class EventControllerTests {
 				)
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].objectName").exists())
-				.andExpect(jsonPath("$[0].defaultMessage").exists())
-				.andExpect(jsonPath("$[0].code").exists())
+				.andExpect(jsonPath("content[0].objectName").exists())
+				.andExpect(jsonPath("content[0].defaultMessage").exists())
+				.andExpect(jsonPath("content[0].code").exists())
+				.andExpect(jsonPath("_link.index").exists())
 		;
 
+	}
+
+	@Test
+	@DisplayName("30개의 이벤트를 10개씩 페이징하여 조회하기")
+	public void queryEvents() throws Exception {
+		//Given
+		IntStream.range(0, 30).forEach(this::generateEvent);
+
+		//When
+		this.mockMvc.perform(get("/api/events")
+				.param("page", "0")
+				.param("size", "10")
+				.param("sort", "id,DESC") // id, 내림차순
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("page").exists())
+				.andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+				.andExpect(jsonPath("_links.self").exists())
+				.andExpect(jsonPath("_links.profile").exists())
+				.andDo(document("query-events"))
+		;
+	}
+
+	private void generateEvent(int i) {
+		Event event = Event.builder()
+				.name("event" + i)
+				.description("test event")
+				.build();
+
+		this.eventRepository.save(event);
 	}
 
 }

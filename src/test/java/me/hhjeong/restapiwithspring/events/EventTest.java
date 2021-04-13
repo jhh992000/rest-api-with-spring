@@ -1,6 +1,7 @@
 package me.hhjeong.restapiwithspring.events;
 
 import me.hhjeong.restapiwithspring.test.QuickTag;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class EventTest {
 	@Test
 	@DisplayName("이벤트 정보 비교 테스트")
 	@QuickTag
+	@Disabled
 	public void javaBean() {
 
 		//조건이 맞을때만 테스트 진행, false인 경우 테스트 중지
@@ -70,6 +72,7 @@ class EventTest {
 	// Junit 5 기준
 	@ParameterizedTest
 	@MethodSource("testFreeParams")
+	@Disabled
 	public void testFree(int basePrice, int maxPrice, boolean isFree){
 		// Given
 		Event event = Event.builder()

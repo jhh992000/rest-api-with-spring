@@ -4,15 +4,31 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.validation.Errors;
 
 import java.io.IOException;
 
 @JsonComponent
 public class ErrorsSerializer extends JsonSerializer<Errors> {
+	private Link indexLink;
+
+	public ErrorsSerializer() {
+
+	}
+
+	public ErrorsSerializer(Link indexLink){
+		super();
+		this.indexLink = indexLink;
+	}
 
 	@Override
 	public void serialize(Errors errors, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
+
+		gen.writeStartObject();
+		gen.writeFieldName("content");
+
 		gen.writeStartArray();
 		errors.getFieldErrors().stream().forEach(e -> {
 			try {
@@ -42,6 +58,14 @@ public class ErrorsSerializer extends JsonSerializer<Errors> {
 			}
 		});
 		gen.writeEndArray();
+
+		gen.writeFieldName("_link");
+		gen.writeStartObject();
+		gen.writeStringField("index", indexLink.getHref());
+		gen.writeEndObject();
+
+		gen.writeEndObject();
+
 	}
 
 }
