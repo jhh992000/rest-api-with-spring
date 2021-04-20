@@ -1,28 +1,19 @@
 package me.hhjeong.restapiwithspring.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import me.hhjeong.restapiwithspring.common.RestDocsConfiguration;
+import me.hhjeong.restapiwithspring.common.BaseControllerTest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 
@@ -37,25 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@Import({RestDocsConfiguration.class})
-@DisplayName("이벤트 생성 통합 테스트")
-@ActiveProfiles("test")
-public class EventControllerTests {
-
-	@Autowired
-	MockMvc mockMvc;
-
-	@Autowired
-	ObjectMapper objectMapper;
+@DisplayName("이벤트 통합 테스트")
+public class EventControllerTests extends BaseControllerTest {
 
 	@Autowired
 	EventRepository eventRepository;
-
-	@Autowired
-	ModelMapper modelMapper;
 
 	@Test
 	@DisplayName("이벤트 생성")
