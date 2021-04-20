@@ -16,13 +16,11 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -72,6 +70,18 @@ public class EventController {
 		PagedModel pageModel = assembler.toModel(page, EventResource::of); //각 이벤트마다 self
 		pageModel.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
 		return ResponseEntity.ok(pageModel);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity getEvent(@PathVariable Integer id) {
+		Optional<Event> optionalEvent = this.eventRepository.findById(id);
+		if (optionalEvent.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Event event = optionalEvent.get();
+		EntityModel<Event> eventEntityModel = EventResource.of(event, "/docs/index.html#resources-events-get");
+		return ResponseEntity.ok(eventEntityModel);
 	}
 
 	private ResponseEntity badRequest(Errors errors) {
