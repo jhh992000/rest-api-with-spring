@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -221,32 +222,60 @@ public class EventControllerTests {
 	@Test
 	@DisplayName("30개의 이벤트를 10개씩 페이징하여 조회하기")
 	public void queryEvents() throws Exception {
-		//Given
+		//Given - 데이터 30개 생성
 		IntStream.range(0, 30).forEach(this::generateEvent);
 
 		//When
-		this.mockMvc.perform(get("/api/events")
+		ResultActions resultActions = this.mockMvc.perform(get("/api/events")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8")
 				.param("page", "0")
 				.param("size", "10")
 				.param("sort", "id,DESC") // id, 내림차순
-				)
-				.andDo(print())
+		);
+
+		//Then
+		resultActions.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("page").exists())
 				.andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
 				.andExpect(jsonPath("_links.self").exists())
 				.andExpect(jsonPath("_links.profile").exists())
-				.andDo(document("query-events"))
+				.andDo(document("query-events",
+						HypermediaDocumentation.links(
+								linkWithRel("first").description("처음 페이지로 이동"),
+								linkWithRel("self").description("현재 페이지로 이동"),
+								linkWithRel("next").description("다음 페이지로 이동"),
+								linkWithRel("last").description("마지막 페이지로 이동"),
+								linkWithRel("profile").description("프로필 페이지로 이동")
+						),
+						requestHeaders(
+								headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+								headerWithName(HttpHeaders.CONTENT_TYPE).description("content-type header")
+						),
+						responseHeaders(
+								headerWithName(HttpHeaders.CONTENT_TYPE).description("content-type header")
+						)
+
+				))
 		;
 	}
 
-	private void generateEvent(int i) {
+	@Test
+	@DisplayName("기존의 이벤트를 하나 조회하기")
+	public void getEvent() throws Exception {
+		//Given
+		Event event = this.generateEvent(100);
+
+	}
+
+	private Event generateEvent(int i) {
 		Event event = Event.builder()
 				.name("event" + i)
 				.description("test event")
 				.build();
 
-		this.eventRepository.save(event);
+		return this.eventRepository.save(event);
 	}
 
 }
