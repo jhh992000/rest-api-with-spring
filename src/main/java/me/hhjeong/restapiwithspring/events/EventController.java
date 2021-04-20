@@ -70,7 +70,7 @@ public class EventController {
 		Page<Event> page = this.eventRepository.findAll(pageable);
 
 		PagedModel pageModel = assembler.toModel(page, EventResource::of); //각 이벤트마다 self
-		pageModel.add(Link.of("/docs/index.html#resources-events-create").withRel("profile"));
+		pageModel.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
 		return ResponseEntity.ok(pageModel);
 	}
 
